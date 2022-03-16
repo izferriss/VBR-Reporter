@@ -99,6 +99,7 @@ int main()
 
 				//Clean up temp variable
 				newDate.timeArr.dequeue();
+				newDate.timeCount = 0;
 
 				//Increment count to reflect changes
 				numUniqueJobs++;
@@ -186,6 +187,7 @@ int main()
 
 						//Clean up temp variable
 						newDate.timeArr.dequeue();
+						newDate.timeCount = 0;
 					}
 				}
 				else //jobName isn't in jobArr
@@ -213,6 +215,7 @@ int main()
 
 					//Clean up temp variable
 					newDate.timeArr.dequeue();
+					newDate.timeCount = 0;
 
 					//Increment count to reflect changes
 					numUniqueJobs++;

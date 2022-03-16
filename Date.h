@@ -8,7 +8,7 @@ class Date
 {
 public:
 	string mDate = "";
-	int timeCount = -1;
+	int timeCount = 0;
 	TimeQueue timeArr;
 	Date();
 	~Date();

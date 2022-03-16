@@ -35,13 +35,8 @@ void DateQueue::enqueue(Date &data)
 	else
 	{
 		arr[rear].mDate = data.mDate;
-		for (int i = 0; i < data.timeCount; i++)
-		{
-			arr[rear].timeArr.arr[i].lineNum = data.timeArr.arr[i].lineNum;
-			arr[rear].timeArr.arr[i].mTime = data.timeArr.arr[i].mTime;
-
-		}
-		arr[rear].timeCount = data.timeCount;
+		arr[rear].timeArr.enqueue(data.timeArr.arr[data.timeCount - 1]);
+		arr[rear].timeCount++;
 		rear ++;
 	}
 }
@@ -58,6 +53,8 @@ void DateQueue::dequeue()
 		{
 			arr[i] = arr[i + 1];
 		}
+
+		rear--;
 	}
 }
 

@@ -53,6 +53,8 @@ void TimeQueue::dequeue()
 		{
 			arr[i] = arr[i + 1];
 		}
+
+		rear--;
 	}
 }
 
