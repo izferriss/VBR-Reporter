@@ -27,7 +27,7 @@ bool TimeQueue::isEmpty()
 	return (front == rear);
 }
 
-void TimeQueue::enqueue(TimeClass data)
+void TimeQueue::enqueue(TimeClass &data)
 {
 	if (isFull())
 	{

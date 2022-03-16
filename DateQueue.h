@@ -1,8 +1,8 @@
 #pragma once
 #include <iostream>
+#include <string>
 #include "Date.h"
-#include "Time.h"
-#include "TimeQueue.h"
+
 
 using namespace std;
 
@@ -17,7 +17,7 @@ public:
 	~DateQueue();
 	bool isFull();
 	bool isEmpty();
-	void enqueue(Date data);
+	void enqueue(Date &data);
 	void dequeue();
 	void print();
 	void printFront();

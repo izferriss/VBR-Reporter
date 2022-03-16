@@ -1,6 +1,5 @@
 #pragma once
-#include<string>
-#include "TimeClass.h"
+#include <string>
 #include "TimeQueue.h"
 
 using namespace std;

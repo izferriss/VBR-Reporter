@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <string>
 #include "TimeClass.h"
 
 using namespace std;
@@ -15,7 +16,7 @@ public:
 	~TimeQueue();
 	bool isFull();
 	bool isEmpty();
-	void enqueue(TimeClass data);
+	void enqueue(TimeClass &data);
 	void dequeue();
 	void print();
 	void printFront();

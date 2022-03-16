@@ -26,7 +26,7 @@ bool DateQueue::isEmpty()
 	return (front == rear);
 }
 
-void DateQueue::enqueue(Date data)
+void DateQueue::enqueue(Date &data)
 {
 	if (isFull())
 	{
@@ -35,7 +35,12 @@ void DateQueue::enqueue(Date data)
 	else
 	{
 		arr[rear].mDate = data.mDate;
-		arr[rear].timeArr = data.timeArr;
+		for (int i = 0; i < data.timeCount; i++)
+		{
+			arr[rear].timeArr.arr[i].lineNum = data.timeArr.arr[i].lineNum;
+			arr[rear].timeArr.arr[i].mTime = data.timeArr.arr[i].mTime;
+
+		}
 		arr[rear].timeCount = data.timeCount;
 		rear ++;
 	}
