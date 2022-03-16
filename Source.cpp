@@ -9,15 +9,19 @@
 #include "TimeQueue.h"
 #include "DateQueue.h"
 
-//Constants
-const int MAX_RECORDS = 1000;
-const int MAX_DATES = 14;
-const int MAX_TIMES = 24;
+/* YOU CAN CHANGE CONSTANTS AND PATH*/
 
+//Constants
+const int MAX_RECORDS = 1000;										//Number of unique jobs allowed
+
+//Namespace (don't change)
 using namespace std;
 
+string path = "I:\\Temp\\PSTest-Ivan\\main_record.csv";				//use '\\' escape characters to infer '\' to compiler
+
+/*DON'T CHANGE ANYTHING ELSE*/
+
 //Variables
-string path = "I:\\Temp\\PSTest-Ivan\\main_record.csv";				//file path ("\\" translates to "\" at run time, otherwise error)
 ifstream din(path);													//opens file for reading
 string sLine;														//placeholder string for reading an entire line of the csv
 size_t q1, q2, q3, q4, comma, dateSpace;							//position placeholders for string operations (q = quotation)
@@ -28,9 +32,12 @@ int tempJobIndex, tempDateIndex, tempTimeIndex = -1;
 bool isFound = false;
 
 Job jobArr[MAX_RECORDS];
-
 Date newDate;
 TimeClass newTime;
+
+int deleteLineArr[MAX_RECORDS];
+int numLinesToDelete = 0;
+
 
 //Function declarations
 void printAll();
@@ -74,7 +81,7 @@ int main()
 			//TESTING: cout << sTime << endl;
 
 			//jobArr is empty
-			if (numUniqueJobs == 0)
+			if (sizeof(jobArr) == 0)
 			{
 				jobArr[numUniqueJobs].name = sJobName;
 				jobArr[numUniqueJobs].dateCount = 0;
@@ -93,9 +100,30 @@ int main()
 				//Increment count to reflect changes
 				newDate.timeCount++;
 
-				//Assign and count new date into JobArr
-				jobArr[numUniqueJobs].dateArr.enqueue(newDate);
-				jobArr[numUniqueJobs].dateCount++;
+				//If jobArr's dateArr is full
+				if (jobArr[numUniqueJobs].dateArr.isFull())
+				{
+					//Copy all time's line numbers from the front of the date queue into deleteLineArr
+					for (int i = 0; i < jobArr[numUniqueJobs].dateArr.arr[0].timeCount; i++)
+					{
+						deleteLineArr[numLinesToDelete] = jobArr[numUniqueJobs].dateArr.arr[0].timeArr.arr[i].lineNum;
+						numLinesToDelete++;
+					}
+
+					//Remove the first dateArr entry
+					jobArr[numUniqueJobs].dateArr.dequeue();
+
+					//Assign and count the new date into JobArr
+					jobArr[numUniqueJobs].dateArr.enqueue(newDate);
+					//Datecount remains the same
+
+				}
+				else
+				{
+					//Assign and count new date into JobArr
+					jobArr[numUniqueJobs].dateArr.enqueue(newDate);
+					jobArr[numUniqueJobs].dateCount++;
+				}
 
 				//Clean up temp variable
 				newDate.timeArr.dequeue();
@@ -181,9 +209,30 @@ int main()
 						//Increment count to reflect changes
 						newDate.timeCount++;
 
-						//Assign and count new date into JobArr
-						jobArr[tempJobIndex].dateArr.enqueue(newDate);
-						jobArr[tempJobIndex].dateCount++;
+						//If jobArr's dateArr is full
+						if (jobArr[tempJobIndex].dateArr.isFull())
+						{
+							//Copy all time's line numbers from the front of the date queue into deleteLineArr
+							for (int i = 0; i < jobArr[tempJobIndex].dateArr.arr[0].timeCount; i++)
+							{
+								deleteLineArr[numLinesToDelete] = jobArr[tempJobIndex].dateArr.arr[0].timeArr.arr[i].lineNum;
+								numLinesToDelete++;
+							}
+
+							//Remove the first dateArr entry
+							jobArr[tempJobIndex].dateArr.dequeue();
+
+							//Assign and count the new date into JobArr
+							jobArr[tempJobIndex].dateArr.enqueue(newDate);
+							//Datecount remains the same
+
+						}
+						else
+						{
+							//Assign and count new date into JobArr
+							jobArr[tempJobIndex].dateArr.enqueue(newDate);
+							jobArr[tempJobIndex].dateCount++;
+						}
 
 						//Clean up temp variable
 						newDate.timeArr.dequeue();
@@ -209,9 +258,30 @@ int main()
 					//Increment count to reflect changes
 					newDate.timeCount++;
 
-					//Assign and count new date into JobArr
-					jobArr[numUniqueJobs].dateArr.enqueue(newDate);
-					jobArr[numUniqueJobs].dateCount++;
+					//If jobArr's dateArr is full
+					if (jobArr[numUniqueJobs].dateArr.isFull())
+					{
+						//Copy all time's line numbers from the front of the date queue into deleteLineArr
+						for (int i = 0; i < jobArr[numUniqueJobs].dateArr.arr[0].timeCount; i++)
+						{
+							deleteLineArr[numLinesToDelete] = jobArr[numUniqueJobs].dateArr.arr[0].timeArr.arr[i].lineNum;
+							numLinesToDelete++;
+						}
+
+						//Remove the first dateArr entry
+						jobArr[numUniqueJobs].dateArr.dequeue();
+
+						//Assign and count the new date into JobArr
+						jobArr[numUniqueJobs].dateArr.enqueue(newDate);
+						//Datecount remains the same
+
+					}
+					else
+					{
+						//Assign and count new date into JobArr
+						jobArr[numUniqueJobs].dateArr.enqueue(newDate);
+						jobArr[numUniqueJobs].dateCount++;
+					}
 
 					//Clean up temp variable
 					newDate.timeArr.dequeue();
@@ -250,5 +320,10 @@ void printAll()
 				cout << "\t\t" << jobArr[i].dateArr.arr[j].timeArr.arr[k].mTime << endl;
 			}
 		}
+	}
+
+	for (int i = 0; i < numLinesToDelete; i++)
+	{
+		cout << "Need to delete line: " << deleteLineArr[i] << endl;
 	}
 }

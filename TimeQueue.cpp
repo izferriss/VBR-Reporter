@@ -7,7 +7,7 @@ using namespace std;
 
 TimeQueue::TimeQueue()
 {
-	front = rear = 0;
+	front = rear = -1;
 	capacity = MAX_TIMES;
 	arr = new TimeClass[MAX_TIMES];
 }
@@ -15,16 +15,17 @@ TimeQueue::TimeQueue()
 TimeQueue::~TimeQueue()
 {
 	delete[] arr;
+	arr = nullptr;
 }
 
 bool TimeQueue::isFull()
 {
-	return (capacity == rear);
+	return (front == 0 && rear == capacity -1);
 }
 
 bool TimeQueue::isEmpty()
 {
-	return (front == rear);
+	return (front == -1);
 }
 
 void TimeQueue::enqueue(TimeClass &data)
@@ -35,9 +36,15 @@ void TimeQueue::enqueue(TimeClass &data)
 	}
 	else
 	{
+		if (front == -1)
+		{
+			front = 0;
+		}
+
+		rear++;
 		arr[rear].lineNum = data.lineNum;
 		arr[rear].mTime = data.mTime;
-		rear++;
+
 	}
 }
 
@@ -49,11 +56,11 @@ void TimeQueue::dequeue()
 	}
 	else
 	{
-		for (int i = front; i < rear - 1; i++)
-		{
-			arr[i] = arr[i + 1];
-		}
-
+		for (int i = 0; i < rear; i++)
+			{
+				arr[i].lineNum = arr[i + 1].lineNum;
+				arr[i].mTime = arr[i + 1].mTime;
+			}
 		rear--;
 	}
 }
