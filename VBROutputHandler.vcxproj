@@ -139,11 +139,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Date.cpp" />
-    <ClCompile Include="Job.cpp" />
     <ClCompile Include="DateQueue.cpp" />
     <ClCompile Include="Source.cpp" />
-    <ClCompile Include="TimeClass.cpp" />
     <ClCompile Include="TimeQueue.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -8,7 +8,7 @@ class TimeClass
 public:
 	string mTime = "";
 	int lineNum = -1;
-	TimeClass();
-	~TimeClass();
+	TimeClass() {};
+	~TimeClass() {};
 };
 

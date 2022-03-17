@@ -10,7 +10,7 @@ public:
 	string name;
 	int dateCount;
 	DateQueue dateArr;
-	Job();
-	~Job();
+	Job() {};
+	~Job() {};
 };
 
