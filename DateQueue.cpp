@@ -1,6 +1,5 @@
 #include "DateQueue.h"
-
-const int MAX_DATES = 14;
+#include "Constants.h"
 
 using namespace std;
 
@@ -109,7 +108,7 @@ bool DateQueue::doesContain(string term)
 	}
 	else
 	{
-		for (int i = 0; i < rear; i++)
+		for (int i = 0; i < int(capacity); i++)
 		{
 			if (term == arr[i].mDate)
 			{

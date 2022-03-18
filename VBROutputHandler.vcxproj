@@ -141,12 +141,15 @@
   <ItemGroup>
     <ClCompile Include="DateQueue.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="StringQueue.cpp" />
     <ClCompile Include="TimeQueue.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Constants.h" />
     <ClInclude Include="Date.h" />
     <ClInclude Include="Job.h" />
     <ClInclude Include="DateQueue.h" />
+    <ClInclude Include="StringQueue.h" />
     <ClInclude Include="TimeClass.h" />
     <ClInclude Include="TimeQueue.h" />
   </ItemGroup>

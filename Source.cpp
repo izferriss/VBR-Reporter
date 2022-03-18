@@ -7,27 +7,24 @@
 #include "TimeClass.h"
 #include "TimeQueue.h"
 #include "DateQueue.h"
-
-//Constants
-const int MAX_RECORDS = 1000;										//Number of unique jobs allowed
-//const int MAX_DATES												//see DateQueue.cpp
-//const int MAX_TIMES												//see TimeQueue.cpp
+#include "StringQueue.h"
+#include "Constants.h"
 
 using namespace std;
 
 //Variables
-string path = "I:\\Temp\\PSTest-Ivan\\main_record.csv";				//use '\\' escape characters to infer '\' to compiler
-ifstream din(path);													//opens file for reading
+ifstream din(PATH);													//opens file for reading
 string sLine;														//placeholder string for reading an entire line of the csv
 size_t q1, q2, q3, q4, comma, dateSpace;							//placeholder indexes for string operations (q = quotation)
 string sJobName, sDate, sTime;										//placeholder strings for reading in file elements
 int tempJobIndex, tempDateIndex, tempTimeIndex = -1;				//placeholder indexes used for adding new data to existing records
 
 //Data Structures
-Job jobArr[MAX_RECORDS];											//an array of Job classes - main data structure
-Date newDate;														//a temporary Date class used to initialize variables before adding to jobArr
-TimeClass newTime;													//a temporary TimeClass used to initalize variables before adding to Date class
-int deleteLineArr[MAX_RECORDS];										//an array that keeps track of which lines to be deleted from the file we read from
+Job jobArr[MAX_RECORDS];											//an array of Job classes - MAIN DATA STRUCTURE
+Date newDate;														//a temporary Date class used to initialize variables before adding to jobArr - TEMP ASSIGNMENT
+TimeClass newTime;													//a temporary TimeClass used to initalize variables before adding to Date class - TEMP ASSIGNMENT
+int deleteLineArr[MAX_RECORDS];										//an array that keeps track of which lines to be deleted from the file we read from - HELPER
+StringQueue dateHeaders;											//an array for keeping track of any of the dates that are in any job - HELPER
 
 //Counters
 int numUniqueJobs = 0;												//keeps track of the number of elements in jobArr											
@@ -43,6 +40,8 @@ bool dupLine = false;												//used to display error message if there are du
 //Declarations
 void printDataToConsole();
 void printDeleteLinesToConsole();
+void printDateHeadersToConsole();
+void output();
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -74,18 +73,29 @@ int main()
 
 			//Isolates JobName
 			sJobName = sLine.substr(q1 + 1, q2 - q1 - 1);
-			//TESTING: cout << sJobName << endl;
 
 			//Isolates date
 			sDate = sLine.substr(q3 + 1, dateSpace - q3 - 1);
-			//TESTING: cout << sDate << endl;
-
+			if (sDate != "")
+			{
+				if (!dateHeaders.doesContain(sDate))
+				{
+					if (!dateHeaders.isFull())
+					{
+						dateHeaders.enqueue(sDate);
+					}
+					else
+					{
+						dateHeaders.dequeue();
+						dateHeaders.enqueue(sDate);
+					}
+				}
+			}
 			//Isolates time
 			sTime = sLine.substr(dateSpace + 1, q4 - dateSpace - 1);
-			//TESTING: cout << sTime << endl;
 
 			//jobArr is empty
-			if (sizeof(jobArr) == 0 && numUniqueJobs < MAX_RECORDS)
+			if (sizeof(jobArr)/sizeof(jobArr[0]) == 0 && numUniqueJobs < MAX_RECORDS && sJobName != "")
 			{
 				jobArr[numUniqueJobs].name = sJobName;
 				jobArr[numUniqueJobs].dateCount = 0;
@@ -140,7 +150,7 @@ int main()
 			//jobArr contains elements
 			else
 			{
-				if (numUniqueJobs < MAX_RECORDS)
+				if (numUniqueJobs < MAX_RECORDS && sJobName != "")
 				{
 					//Loop through jobArr
 					for (int i = 0; i < numUniqueJobs; i++)
@@ -322,12 +332,12 @@ int main()
 	}
 	if (badFile)
 	{
-		cout << "Error opening " << path << "\nCheck file name and permissions before running again." << endl;
+		cout << "Error opening " << PATH << "\nCheck file name and permissions before running again." << endl;
 		cout << "This program will now exit." << endl;
 	}
 	if (dupLine)
 	{
-		cout << "Duplicate line found at line number " << lineCount << "!\nOpen the file at " << path << " and make corrections.\nThis program will now exit. " << endl;
+		cout << "Duplicate line found at line number " << lineCount << "!\nOpen the file at " << PATH << " and make corrections.\nThis program will now exit. " << endl;
 	}
 
 	//If no errors, do post-work here
@@ -335,6 +345,8 @@ int main()
 	{
 		printDataToConsole();
 		printDeleteLinesToConsole();
+		printDateHeadersToConsole();
+		output();
 	}
 
 	return 0;
@@ -364,4 +376,83 @@ void printDeleteLinesToConsole()
 	{
 		cout << "Need to delete line: " << deleteLineArr[i] << endl;
 	}
+}
+
+void printDateHeadersToConsole()
+{
+	for (int i = 0; i < int(dateHeaders.capacity); i++)
+	{
+		cout << dateHeaders.arr[i] << endl;
+	}
+}
+
+void output()
+{
+	ofstream dout;
+	bool match = false;
+	int start = 0;
+
+	dout.open(OUTPUT);
+	dout << "<HTML>\n";
+	dout << "<HEAD>\n";
+	dout << "\t<STYLE>\n";
+	dout << "table, th, td\n{\n\tborder: 1px solid black;\n\tborder-collapse: collapse;\n\tempty-cells: show;\n}\n";
+	dout << "\t</STYLE>\n";
+	dout << "</HEAD>\n";
+	dout << "<BODY>\n";
+	dout << "<TABLE>\n";
+	dout << "\t<TR>\n";
+	dout << "\t\t<TH>Job Name</TH>\n";
+	for (int i = 0; i < dateHeaders.rear + 1; i++)
+	{
+		if (dateHeaders.arr[i] == "")
+		{
+			dout << "\t\t<TH>_____</TH>\n";
+		}
+		else
+		{
+			dout << "\t\t<TH>" << dateHeaders.arr[i] << "</TH>\n";
+		}
+	}
+	dout << "\t</TR>\n";
+	for (int i = 0; i < numUniqueJobs; i++)
+	{
+		dout << "\t<TR>\n";
+		dout << "\t\t<TD>" << jobArr[i].name << "</TD>\n";
+		for (int j = 0; j < jobArr[i].dateArr.rear + 1; j++)
+		{
+			for (int k = start; k < dateHeaders.rear + 1; k++)
+			{
+				if (dateHeaders.doesContain(jobArr[i].dateArr.arr[j].mDate))
+				{
+					if (jobArr[i].dateArr.arr[j].mDate == dateHeaders.arr[k])
+					{
+						dout << "\t\t<TD>";
+						for (int l = 0; l < jobArr[i].dateArr.arr[j].timeArr.rear + 1; l++)
+						{
+							dout << jobArr[i].dateArr.arr[j].timeArr.arr[l].mTime << "<BR>";
+						}
+						dout << "</TD>\n";
+						start = k + 1;
+						break;
+					}
+					else
+					{
+						dout << "\t\t<TD>_</TD>\n";
+					}
+				}
+			}
+		}
+		while (start < dateHeaders.rear + 1)
+		{
+			start++;
+			dout << "\t\t<TD>_</TD>\n";
+		}
+		start = 0;
+
+		dout << "\t</TR>\n";
+	}
+	dout << "</TABLE>\n";
+	dout << "</HTML>";
+	dout.close();
 }

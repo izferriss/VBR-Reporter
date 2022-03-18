@@ -1,33 +1,32 @@
-#include "TimeQueue.h"
+#include "StringQueue.h"
 #include "Constants.h"
 
 using namespace std;
 
-
-TimeQueue::TimeQueue()
+StringQueue::StringQueue()
 {
 	front = rear = -1;
-	capacity = MAX_TIMES;
-	arr = new TimeClass[MAX_TIMES];
+	capacity = MAX_DATES;
+	arr = new string[MAX_DATES];
 }
 
-TimeQueue::~TimeQueue()
+StringQueue::~StringQueue()
 {
 	delete[] arr;
 	arr = nullptr;
 }
 
-bool TimeQueue::isFull()
+bool StringQueue::isFull()
 {
-	return (front == 0 && rear == capacity -1);
+	return (front == 0 && rear == capacity - 1);
 }
 
-bool TimeQueue::isEmpty()
+bool StringQueue::isEmpty()
 {
 	return (front == -1);
 }
 
-void TimeQueue::enqueue(TimeClass &data)
+void StringQueue::enqueue(string& data)
 {
 	if (isFull())
 	{
@@ -41,14 +40,15 @@ void TimeQueue::enqueue(TimeClass &data)
 		}
 
 		rear++;
-		arr[rear].lineNum = data.lineNum;
-		arr[rear].mTime = data.mTime;
+
+		arr[rear] = data;
 
 	}
 }
 
-void TimeQueue::dequeue()
+void StringQueue::dequeue()
 {
+
 	if (isEmpty())
 	{
 		cout << "Queue is empty!" << endl;
@@ -56,15 +56,16 @@ void TimeQueue::dequeue()
 	else
 	{
 		for (int i = 0; i < rear; i++)
-			{
-				arr[i].lineNum = arr[i + 1].lineNum;
-				arr[i].mTime = arr[i + 1].mTime;
-			}
+		{
+			arr[i] = arr[i + 1];
+		}
+
+		arr[rear] = "";
 		rear--;
 	}
 }
 
-void TimeQueue::print()
+void StringQueue::print()
 {
 	if (isEmpty())
 	{
@@ -73,22 +74,22 @@ void TimeQueue::print()
 
 	for (int i = front; i < rear; i++)
 	{
-		cout << arr[i].mTime << endl;
+		cout << arr[i] << endl;
 	}
 }
 
-void TimeQueue::printFront()
+void StringQueue::printFront()
 {
 	if (isEmpty())
 	{
 		cout << "Queue is empty!" << endl;
 	}
 
-	cout << arr[front].mTime << endl;
+	cout << arr[front] << endl;
 
 }
 
-bool TimeQueue::doesContain(string term)
+bool StringQueue::doesContain(string term)
 {
 	if (isEmpty())
 	{
@@ -99,7 +100,7 @@ bool TimeQueue::doesContain(string term)
 	{
 		for (int i = 0; i < int(capacity); i++)
 		{
-			if (term == arr[i].mTime)
+			if (term == arr[i])
 			{
 				return true;
 			}
