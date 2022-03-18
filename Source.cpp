@@ -95,7 +95,7 @@ int main()
 			sTime = sLine.substr(dateSpace + 1, q4 - dateSpace - 1);
 
 			//jobArr is empty
-			if (sizeof(jobArr)/sizeof(jobArr[0]) == 0 && numUniqueJobs < MAX_RECORDS && sJobName != "")
+			if (numUniqueJobs == 0 && numUniqueJobs < MAX_RECORDS && sJobName != "")
 			{
 				jobArr[numUniqueJobs].name = sJobName;
 				jobArr[numUniqueJobs].dateCount = 0;
@@ -380,7 +380,7 @@ void printDeleteLinesToConsole()
 
 void printDateHeadersToConsole()
 {
-	for (int i = 0; i < int(dateHeaders.capacity); i++)
+	for (int i = 0; i < int(dateHeaders.rear +1); i++)
 	{
 		cout << dateHeaders.arr[i] << endl;
 	}
@@ -396,11 +396,17 @@ void output()
 	dout << "<HTML>\n";
 	dout << "<HEAD>\n";
 	dout << "\t<STYLE>\n";
-	dout << "table, th, td\n{\n\tborder: 1px solid black;\n\tborder-collapse: collapse;\n\tempty-cells: show;\n}\n";
+	dout << "\tth:first-of-type\n\t{\n\t\tborder-top-left-radius: 10px;\n\t}\n";
+	dout << "\tth:last-of-type\n\t{\n\t\tborder-top-right-radius: 10px;\n\t}\n";
+	dout << "\ttr:last-of-type td:first-of-type\n\t{\n\t\tborder-bottom-left-radius: 10px;\n\t}\n";
+	dout << "\ttr:last-of-type td:last-of-type\n\t{\n\t\tborder-bottom-right-radius: 10px;\n\t}\n";
+	dout << "\tth, td\n\t{\n\t\tborder: 1px solid black;\n\t\tborder-collapse: collapse;\n\t\tempty-cells: show;\n\t}\n";
+	dout << "\ttable\n\t{\n\t\tborder-style: hidden;\n\t\tborder-radius:10px;\n\t\tbox-shadow: 0 0 0 5px #666;\n\t}\n";
 	dout << "\t</STYLE>\n";
 	dout << "</HEAD>\n";
 	dout << "<BODY>\n";
 	dout << "<TABLE>\n";
+	dout << "<THEAD>\n";
 	dout << "\t<TR>\n";
 	dout << "\t\t<TH>Job Name</TH>\n";
 	for (int i = 0; i < dateHeaders.rear + 1; i++)
@@ -415,6 +421,8 @@ void output()
 		}
 	}
 	dout << "\t</TR>\n";
+	dout << "</THEAD>\n";
+	dout << "<TBODY>\n";
 	for (int i = 0; i < numUniqueJobs; i++)
 	{
 		dout << "\t<TR>\n";
@@ -452,6 +460,7 @@ void output()
 
 		dout << "\t</TR>\n";
 	}
+	dout << "</TBODY>\n";
 	dout << "</TABLE>\n";
 	dout << "</HTML>";
 	dout.close();
