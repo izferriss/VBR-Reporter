@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <algorithm>
 #include "Job.h"
 #include "Date.h"
 #include "TimeClass.h"
@@ -15,8 +16,10 @@ using namespace std;
 //Variables
 ifstream din(PATH);													//opens file for reading
 string sLine;														//placeholder string for reading an entire line of the csv
-size_t q1, q2, q3, q4, comma, dateSpace;							//placeholder indexes for string operations (q = quotation)
-string sJobName, sDate, sTime;										//placeholder strings for reading in file elements
+size_t q1, q2, q3, q4, comma, dateSpace, colonMIN,
+       colonSEC, POSTSpace;											//placeholder indexes for string operations (q = quotation)
+string sJobName, sDate, sTime, sTimeHR, sTimeMIN,
+	   sTimeSEC, sTimePOST;											//placeholder strings for reading in file elements
 int tempJobIndex, tempDateIndex, tempTimeIndex = -1;				//placeholder indexes used for adding new data to existing records
 
 //Data Structures
@@ -36,6 +39,7 @@ bool isFound = false;												//used in searching for exists jobs/dates/times
 bool badFile = false;												//used to display error message if there are issues opening the file
 bool maxJobs = false;												//used to display error message if MAX_RECORDS is not big enough for the dataset
 bool dupLine = false;												//used to display error message if there are duplicate lines in the file (shouldn't happen ever)
+bool badJob = false;												//used to display error message if job name is blank
 
 //Declarations
 void printDataToConsole();
@@ -93,6 +97,36 @@ int main()
 			}
 			//Isolates time
 			sTime = sLine.substr(dateSpace + 1, q4 - dateSpace - 1);
+
+			//Isolates hh:mm:ss tt
+			colonMIN = sTime.find(":");
+			colonSEC = sTime.find(":", colonMIN + 1);
+			POSTSpace = sTime.find(" ", colonSEC + 1);
+			sTimeHR = sTime.substr(0, colonMIN);
+			sTimeMIN = sTime.substr(colonMIN + 1, colonSEC - colonMIN - 1);
+			sTimeSEC = sTime.substr(colonSEC + 1, POSTSpace - colonSEC - 1);
+			sTimePOST = sTime.substr(POSTSpace + 1, sTime.length() - 1);
+
+			//convert hour to military
+			if (sTimePOST == "PM" && sTimeHR != "12")
+			{ 
+				sTimeHR = to_string(stoi(sTimeHR) + 12);
+			}
+			else if (sTimePOST == "PM" && sTimeHR == "12")
+			{
+				sTimeHR = "12";
+			}
+			if (sTimePOST == "AM" && sTimeHR == "12")
+			{
+				sTimeHR = "00";
+			}
+			else if (sTimePOST == "AM" && sTimeHR != "10" && sTimeHR != "11")
+			{
+				sTimeHR = "0" + sTimeHR;
+			}
+			
+			//set sTime to military instead of AM/PM
+			sTime = sTimeHR + ":" + sTimeMIN + ":" + sTimeSEC;
 
 			//jobArr is empty
 			if (numUniqueJobs == 0 && numUniqueJobs < MAX_RECORDS && sJobName != "")
@@ -309,8 +343,16 @@ int main()
 				}
 				else
 				{
-					maxJobs = false;
-					break;
+					if (sJobName == "")
+					{
+						badJob = true;
+						break;
+					}
+					else
+					{
+						maxJobs = true;
+						break;
+					}
 				}
 			}
 		}//end while
@@ -327,25 +369,30 @@ int main()
 	//Error messages
 	if (maxJobs)
 	{
-		cout << "Cannot add anymore jobs to the data set.\nIncrease MAX_RECORDS parameter before running again." << endl;
+		cout << "ERROR: Cannot add anymore jobs to the data set.\nIncrease MAX_RECORDS parameter before running again." << endl;
 		cout << "This program will now exit." << endl;
+	}
+	if (badJob)
+	{
+		cout << "WARNING: Cannot add job from line " << lineCount << " to data set.\nCheck input file for bad data before running again." << endl;
 	}
 	if (badFile)
 	{
-		cout << "Error opening " << PATH << "\nCheck file name and permissions before running again." << endl;
+		cout << "ERROR: Error opening " << PATH << "\nCheck file name and permissions before running again." << endl;
 		cout << "This program will now exit." << endl;
 	}
 	if (dupLine)
 	{
-		cout << "Duplicate line found at line number " << lineCount << "!\nOpen the file at " << PATH << " and make corrections.\nThis program will now exit. " << endl;
+		cout << "ERROR: Duplicate line found at line number " << lineCount << "!\nOpen the file at " << PATH << " and make corrections." << endl;
+		cout << "This program will now exit. " << endl;
 	}
 
 	//If no errors, do post-work here
 	if (!maxJobs && !badFile && !dupLine)
 	{
-		printDataToConsole();
-		printDeleteLinesToConsole();
-		printDateHeadersToConsole();
+		//printDataToConsole();
+		//printDeleteLinesToConsole();
+		//printDateHeadersToConsole();
 		output();
 	}
 
@@ -362,7 +409,7 @@ void printDataToConsole()
 		for (int j = 0; j < jobArr[i].dateCount; j++)
 		{
 			cout << "\t" << jobArr[i].dateArr.arr[j].mDate << endl;
-			for (int k = 0; k < jobArr[i].dateArr.arr[j].timeCount; k++)
+			for (int k = jobArr[i].dateArr.arr[j].timeCount - 1; k > -1; k--)
 			{
 				cout << "\t\t" << jobArr[i].dateArr.arr[j].timeArr.arr[k].mTime << endl;
 			}
@@ -391,77 +438,208 @@ void output()
 	ofstream dout;
 	bool match = false;
 	int start = 0;
+	string* copyArr = new string[MAX_TIMES];
+	int copyArrLength = 0;
 
+	cout << "Outputting HTML..." << endl;
 	dout.open(OUTPUT);
 	dout << "<HTML>\n";
 	dout << "<HEAD>\n";
 	dout << "\t<STYLE>\n";
-	dout << "\tth:first-of-type\n\t{\n\t\tborder-top-left-radius: 10px;\n\t}\n";
-	dout << "\tth:last-of-type\n\t{\n\t\tborder-top-right-radius: 10px;\n\t}\n";
-	dout << "\ttr:last-of-type td:first-of-type\n\t{\n\t\tborder-bottom-left-radius: 10px;\n\t}\n";
-	dout << "\ttr:last-of-type td:last-of-type\n\t{\n\t\tborder-bottom-right-radius: 10px;\n\t}\n";
-	dout << "\tth, td\n\t{\n\t\tborder: 1px solid black;\n\t\tborder-collapse: collapse;\n\t\tempty-cells: show;\n\t}\n";
-	dout << "\ttable\n\t{\n\t\tborder-style: hidden;\n\t\tborder-radius:10px;\n\t\tbox-shadow: 0 0 0 5px #666;\n\t}\n";
+	dout << "\t*\n\t{\n\t\tfont-family: \"Lucida Console\", \"Courier New\", monospace;\n\t}\n";
+	dout << "\t#report th:first-of-type\n\t{\n\t\tborder-top-left-radius: 10px;\n\t}\n";
+	dout << "\t#report th:last-of-type\n\t{\n\t\tborder-top-right-radius: 10px;\n\t}\n";
+	dout << "\t#report tr:last-of-type #report td:first-of-type\n\t{\n\t\tborder-bottom-left-radius: 10px;\n\t}\n";
+	dout << "\t#report tr:last-of-type #report td:last-of-type\n\t{\n\t\tborder-bottom-right-radius: 10px;\n\t}\n";
+	dout << "\t#report th, td\n\t{\n\t\tborder: 1px solid black;\n\t\tborder-collapse: collapse;\n\t\tposition: relative;\n\t\tempty-cells: show;\n\t\ttext-align: center;\n\t}\n";
+	dout << "\tth.rowheaders:hover\n\t{\n\t\tbackground-color: #bdcebe;\n\t\tcursor: pointer;\n\t\ttext-decoration: underline;\n\t}\n";
+	dout << "\t#report td:hover::before\n\t{\n\t\tbackground-color: #e9efe9;\n\t\tcontent: '';\n\t\theight: 100%;\n\t\tleft: -5000px;\n\t\tposition: absolute;\n\t\ttop: 0;\n\t\twidth: 10000px;\n\t\tz-index: -2;\n\t}\n";
+	dout << "\t#report td:hover::after\n\t{\n\t\tbackground-color: #e9efe9;\n\t\tcontent: '';\n\t\theight: 10000px;\n\t\tleft: 0;\n\t\tposition: absolute;\n\t\ttop: -5000px;\n\t\twidth: 100%;\n\t\tz-index: -1;\n\t}\n";
+	dout << "\t#report\n\t{\n\t\tborder-spacing: 0;\n\t\tborder-collapse: collapse;\n\t\tborder-style: hidden;\n\t\tborder-radius:10px;\n\t\tbox-shadow: 0 0 0 5px #cebdcd;\n\t\toverflow: hidden;\n\t\tdisplay: inline-block;\n\t}\n";
+	dout << "\t#innercell\n\t{\n\t\tborder-spacing: 0;\n\t\tborder-collapse: collapse;\n\t\tborder-style: hidden;\n\t\ttext-align: center;\n\t}\n";
 	dout << "\t</STYLE>\n";
 	dout << "</HEAD>\n";
 	dout << "<BODY>\n";
-	dout << "<TABLE>\n";
+	dout << "<TABLE id = \"report\">\n";
 	dout << "<THEAD>\n";
 	dout << "\t<TR>\n";
-	dout << "\t\t<TH>Job Name</TH>\n";
+	dout << "\t\t<TH class =\"rowheaders\" onclick=\"sortTable(0)\">Job Name</TH>\n";
 	for (int i = 0; i < dateHeaders.rear + 1; i++)
 	{
 		if (dateHeaders.arr[i] == "")
 		{
+			//This should never happen
 			dout << "\t\t<TH>_____</TH>\n";
 		}
 		else
 		{
-			dout << "\t\t<TH>" << dateHeaders.arr[i] << "</TH>\n";
+			int j = i + 1;
+			dout << "\t\t<TH class =\"rowheaders\" onclick=\"sortTable(" << j << ")\">" << dateHeaders.arr[i] << "</TH>\n";
 		}
 	}
 	dout << "\t</TR>\n";
 	dout << "</THEAD>\n";
 	dout << "<TBODY>\n";
+
+	//For each job
 	for (int i = 0; i < numUniqueJobs; i++)
 	{
+		//Make a new row
 		dout << "\t<TR>\n";
-		dout << "\t\t<TD>" << jobArr[i].name << "</TD>\n";
+		//The first cell is the job name
+		dout << "\t\t<TH>" << jobArr[i].name << "</TH>\n";
+		//for each date in this job
 		for (int j = 0; j < jobArr[i].dateArr.rear + 1; j++)
 		{
+			//for each date that's a header
 			for (int k = start; k < dateHeaders.rear + 1; k++)
 			{
+				//if any header matches this job's date
 				if (dateHeaders.doesContain(jobArr[i].dateArr.arr[j].mDate))
 				{
+					//if the date in this job is equal to the current header
 					if (jobArr[i].dateArr.arr[j].mDate == dateHeaders.arr[k])
 					{
-						dout << "\t\t<TD>";
-						for (int l = 0; l < jobArr[i].dateArr.arr[j].timeArr.rear + 1; l++)
+
+
+						if (jobArr[i].dateArr.arr[j].timeCount > 1)
 						{
-							dout << jobArr[i].dateArr.arr[j].timeArr.arr[l].mTime << "<BR>";
+							dout << "\t\t<TD>\n";
+							dout << "\t\t\t<TABLE align =\"center\" id =\"innercell\">\n";
+							//fill it with times for that job's date
+
+							for (int l = jobArr[i].dateArr.arr[j].timeArr.rear; l > -1; l--)
+							{
+								copyArr[l] = jobArr[i].dateArr.arr[j].timeArr.arr[l].mTime;
+								copyArrLength++;
+								//dout << "\t\t\t\t<TR><TD>";
+								//dout << jobArr[i].dateArr.arr[j].timeArr.arr[l].mTime;
+								//dout << "</TD></TR>\n";
+
+							}
+							
+							sort(copyArr, copyArr + copyArrLength);
+
+							for (int l = 0; l < copyArrLength; l++)
+							{
+								if (copyArr[l] != "")
+								{
+									dout << "\t\t\t\t<TR><TD>";
+									dout << copyArr[l];
+									dout << "</TD></TR>\n";
+								}
+							}
+							dout << "\t\t\t</TABLE>\n";
+							dout << "\t\t</TD>\n";
+							delete[] copyArr;
+							copyArr = new string[MAX_TIMES];
+							copyArrLength = 0;
 						}
-						dout << "</TD>\n";
+						else
+						{
+							//make a cell
+							dout << "\t\t<TD>";
+							for (int l = jobArr[i].dateArr.arr[j].timeArr.rear; l > -1; l--)
+							{
+								dout << jobArr[i].dateArr.arr[j].timeArr.arr[l].mTime;
+							}
+							dout << "</TD>\n";
+						}
+
+						//mark that header complete
 						start = k + 1;
 						break;
+
+
 					}
+					//if the date in this job doesn't equal the current header
 					else
 					{
-						dout << "\t\t<TD>_</TD>\n";
+						//make a blank cell
+						dout << "\t\t<TD></TD>\n";
 					}
 				}
 			}
 		}
+		//if there are no more dates in a job that can be found in the headers, fill in the rest of the cells in that row with blanks
 		while (start < dateHeaders.rear + 1)
 		{
 			start++;
-			dout << "\t\t<TD>_</TD>\n";
+			dout << "\t\t<TD></TD>\n";
 		}
+		//reset LCV for next row
 		start = 0;
 
+		//row end tag
 		dout << "\t</TR>\n";
+
 	}
+
 	dout << "</TBODY>\n";
 	dout << "</TABLE>\n";
+	dout << "</BODY>\n";
+	dout << "<SCRIPT>\n";
+	dout << "function sortTable(n)\n";
+	dout << "\t{\n";
+	dout << "\t\tvar table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;\n";
+	dout << "\t\ttable = document.getElementById(\"report\");\n";
+	dout << "\t\tswitching = true;\n";
+	dout << "\t\tdir = \"asc\";\n";
+	dout << "\t\twhile(switching)\n";
+	dout << "\t\t\t{\n";
+	dout << "\t\t\t\tswitching = false;\n";
+	dout << "\t\t\t\trows = table.rows;\n";
+	dout << "\t\t\t\tfor(i = 1; i <(rows.length - 1); i++)\n";
+	dout << "\t\t\t\t\t{\n";
+	dout << "\t\t\t\t\t\tshouldSwitch = false;\n";
+	dout << "\t\t\t\t\t\tx = rows[i].getElementsByTagName(\"TD\")[n];\n";
+	dout << "\t\t\t\t\t\ty = rows[i + 1].getElementsByTagName(\"TD\")[n];\n";
+	dout << "\t\t\t\t\t\tif(dir == \"asc\")\n";
+	dout << "\t\t\t\t\t\t\t{\n";
+	dout << "\t\t\t\t\t\t\t\tif ((n == 0 && x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) || (n >= 1 && Number(convertDate(x.innerHTML)) > Number(convertDate(y.innerHTML))))\n";
+	dout << "\t\t\t\t\t\t\t\t\t{\n";
+	dout << "\t\t\t\t\t\t\t\t\t\tshouldSwitch = true;\n";
+	dout << "\t\t\t\t\t\t\t\t\t\tbreak;\n";
+	dout << "\t\t\t\t\t\t\t\t\t}\n";
+	dout << "\t\t\t\t\t\t\t}\n";
+	dout << "\t\t\t\t\t\telse if(dir == \"desc\")\n";
+	dout << "\t\t\t\t\t\t\t{\n";
+	dout << "\t\t\t\t\t\t\t\tif ((n == 0 && x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) || (n >= 1 && Number(convertDate(x.innerHTML)) < Number(convertDate(y.innerHTML))))\n";
+	dout << "\t\t\t\t\t\t\t\t\t{\n";
+	dout << "\t\t\t\t\t\t\t\t\t\tshouldSwitch = true;\n";
+	dout << "\t\t\t\t\t\t\t\t\t\tbreak;\n";
+	dout << "\t\t\t\t\t\t\t\t\t}\n";
+	dout << "\t\t\t\t\t\t\t}\n";
+	dout << "\t\t\t\t\t}\n";
+	dout << "\t\t\t\tif (shouldSwitch)\n";
+	dout << "\t\t\t\t\t{\n";
+	dout << "\t\t\t\t\t\trows[i].parentNode.insertBefore(rows[i + 1], rows[i]);\n";
+	dout << "\t\t\t\t\t\tswitching = true;\n";
+	dout << "\t\t\t\t\t\tswitchcount++;\n";
+	dout << "\t\t\t\t\t}\n";
+	dout << "\t\t\t\telse\n";
+	dout << "\t\t\t\t\t{\n";
+	dout << "\t\t\t\t\t\tif(switchcount == 0 && dir == \"asc\")\n";
+	dout << "\t\t\t\t\t\t\t{\n";
+	dout << "\t\t\t\t\t\t\t\tdir = \"desc\";\n";
+	dout << "\t\t\t\t\t\t\t\tswitching = true;\n";
+	dout << "\t\t\t\t\t\t\t}\n";
+	dout << "\t\t\t\t\t}\n";
+	dout << "\t\t\t}\n";
+	dout << "\t}\n";
+	dout << "function convertDate(inDate)\n";
+	dout << "\t{\n";
+	dout << "\t\tif (inDate == \"\")\n";
+	dout << "\t\t\t{\n";
+	dout << "\t\t\t\treturn 245959;\n";
+	dout << "\t\t\t}\n";
+	dout << "\t\telse\n";
+	dout << "\t\t\t{\n";
+	dout << "\t\t\t\tvar part = inDate.split(\":\");\n";
+	dout << "\t\t\t\treturn +(part[0]+part[1]+part[2].substr(0, 2));\n";
+	dout << "\t\t\t}\n";
+	dout << "\t}\n";
+	dout << "</SCRIPT>\n";
 	dout << "</HTML>";
 	dout.close();
 }

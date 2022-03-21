@@ -8,7 +8,7 @@ class Job
 {
 public:
 	string name;
-	int dateCount;
+	int dateCount = 0;
 	DateQueue dateArr;
 	Job() {};
 	~Job() {};
