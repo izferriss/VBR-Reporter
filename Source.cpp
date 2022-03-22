@@ -446,17 +446,24 @@ void output()
 	dout << "<HTML>\n";
 	dout << "<HEAD>\n";
 	dout << "\t<STYLE>\n";
+	dout << "\n\t/* Body and Fonts */\n";				//HTML COMMENT
 	dout << "\t*\n\t{\n\t\tfont-family: \"Lucida Console\", \"Courier New\", monospace;\n\t}\n";
-	dout << "\t#report th:first-of-type\n\t{\n\t\tborder-top-left-radius: 10px;\n\t}\n";
-	dout << "\t#report th:last-of-type\n\t{\n\t\tborder-top-right-radius: 10px;\n\t}\n";
-	dout << "\t#report tr:last-of-type #report td:first-of-type\n\t{\n\t\tborder-bottom-left-radius: 10px;\n\t}\n";
-	dout << "\t#report tr:last-of-type #report td:last-of-type\n\t{\n\t\tborder-bottom-right-radius: 10px;\n\t}\n";
-	dout << "\t#report th, td\n\t{\n\t\tborder: 1px solid black;\n\t\tborder-collapse: collapse;\n\t\tposition: relative;\n\t\tempty-cells: show;\n\t\ttext-align: center;\n\t}\n";
-	dout << "\tth.rowheaders:hover\n\t{\n\t\tbackground-color: #bdcebe;\n\t\tcursor: pointer;\n\t\ttext-decoration: underline;\n\t}\n";
+	dout << "\n\t/* Center Alignment */\n";				//HTML COMMENT
+	dout << "\t#report th, td\n\t{\n\t\tborder: 1px solid #cebdcd;\n\t\tposition: relative;\n\t\tempty-cells: show;\n\t\ttext-align: center;\n\t}\n";
+	dout << "\n\t/* Job Name \"Headers\" */\n";			//HTML COMMENT
+	dout << "\ttd.fauxheader\n\t{\n\t\tfont-weight: bold;\n\t}\n";
+	dout << "\n\t/* Hover Effects */\n";				//HTML COMMENT
+	dout << "\tth.rowheaders:hover\n\t{\n\t\tbackground-color: #bdcebe;\n\t\ttransition: 0.75s;\n\t\tcursor: pointer;\n\t\ttext-decoration: underline;\n\t}\n";
 	dout << "\t#report td:hover::before\n\t{\n\t\tbackground-color: #e9efe9;\n\t\tcontent: '';\n\t\theight: 100%;\n\t\tleft: -5000px;\n\t\tposition: absolute;\n\t\ttop: 0;\n\t\twidth: 10000px;\n\t\tz-index: -2;\n\t}\n";
 	dout << "\t#report td:hover::after\n\t{\n\t\tbackground-color: #e9efe9;\n\t\tcontent: '';\n\t\theight: 10000px;\n\t\tleft: 0;\n\t\tposition: absolute;\n\t\ttop: -5000px;\n\t\twidth: 100%;\n\t\tz-index: -1;\n\t}\n";
-	dout << "\t#report\n\t{\n\t\tborder-spacing: 0;\n\t\tborder-collapse: collapse;\n\t\tborder-style: hidden;\n\t\tborder-radius:10px;\n\t\tbox-shadow: 0 0 0 5px #cebdcd;\n\t\toverflow: hidden;\n\t\tdisplay: inline-block;\n\t}\n";
-	dout << "\t#innercell\n\t{\n\t\tborder-spacing: 0;\n\t\tborder-collapse: collapse;\n\t\tborder-style: hidden;\n\t\ttext-align: center;\n\t}\n";
+	dout << "\n\t/* Rounded Corners */\n";				//HTML COMMENT
+	dout << "\tth:first-of-type\n\t{\n\t\tborder-top-left-radius: 10px;\n\t}\n";
+	dout << "\tth:last-of-type\n\t{\n\t\tborder-top-right-radius: 10px;\n\t}\n";
+	dout << "\ttr:last-of-type td:first-of-type\n\t{\n\t\tborder-bottom-left-radius: 10px;\n\t}\n";
+	dout << "\ttr:last-of-type td:last-of-type\n\t{\n\t\tborder-bottom-right-radius: 10px;\n\t}\n";
+	dout << "\n\t/* Table */\n";						//HTML COMMENT
+	dout << "\t#report\n\t{\n\t\tbackground-clip: content-box;\n\t\tborder-collapse: separate;\n\t\tborder-spacing: 0pt;\n\t\tmargin-bottom: 80px;\n\t\tmargin-right: 80px;\n\t\toverflow: hidden;\n\t\tdisplay: inline-block;\n\t}\n";
+	dout << "\tspan.note\n\t{\n\t\tfont-size: 75%;\n\t}\n";
 	dout << "\t</STYLE>\n";
 	dout << "</HEAD>\n";
 	dout << "<BODY>\n";
@@ -487,7 +494,7 @@ void output()
 		//Make a new row
 		dout << "\t<TR>\n";
 		//The first cell is the job name
-		dout << "\t\t<TH>" << jobArr[i].name << "</TH>\n";
+		dout << "\t\t<TD class =\"fauxheader\">" << jobArr[i].name << "</TD>\n";
 		//for each date in this job
 		for (int j = 0; j < jobArr[i].dateArr.rear + 1; j++)
 		{
@@ -501,36 +508,36 @@ void output()
 					if (jobArr[i].dateArr.arr[j].mDate == dateHeaders.arr[k])
 					{
 
-
+						//If datearr's timecount is more than one
 						if (jobArr[i].dateArr.arr[j].timeCount > 1)
 						{
-							dout << "\t\t<TD>\n";
-							dout << "\t\t\t<TABLE align =\"center\" id =\"innercell\">\n";
-							//fill it with times for that job's date
+							//make a cell
+							dout << "\t\t<TD>";
 
+							//copy datearr's timearr to a new array
 							for (int l = jobArr[i].dateArr.arr[j].timeArr.rear; l > -1; l--)
 							{
 								copyArr[l] = jobArr[i].dateArr.arr[j].timeArr.arr[l].mTime;
+								//increment LCV
 								copyArrLength++;
-								//dout << "\t\t\t\t<TR><TD>";
-								//dout << jobArr[i].dateArr.arr[j].timeArr.arr[l].mTime;
-								//dout << "</TD></TR>\n";
-
 							}
 							
+							//sort ascending (hopefully)
 							sort(copyArr, copyArr + copyArrLength);
 
+							//output all times into cell
 							for (int l = 0; l < copyArrLength; l++)
 							{
 								if (copyArr[l] != "")
 								{
-									dout << "\t\t\t\t<TR><TD>";
-									dout << copyArr[l];
-									dout << "</TD></TR>\n";
+									dout << copyArr[l] << "<BR>";
 								}
 							}
-							dout << "\t\t\t</TABLE>\n";
-							dout << "\t\t</TD>\n";
+
+							//close cell
+							dout << "</TD>\n";
+
+							//reset array memory and LCV
 							delete[] copyArr;
 							copyArr = new string[MAX_TIMES];
 							copyArrLength = 0;
@@ -577,6 +584,10 @@ void output()
 
 	dout << "</TBODY>\n";
 	dout << "</TABLE>\n";
+	dout << "\n<BR>\n<BR>\n";
+	dout << "<SPAN class = \"note\">Click on any header to sort the table by that column.</SPAN>\n<BR>\n";
+	dout << "<SPAN class=\"note\">Any cell that contains multiple times will be sorted only by its first entry.</SPAN>\n<BR>\n";
+	dout << "<SPAN class=\"note\">A black cell is considered to have a time of 25:00:00.</SPAN>\n<BR>\n";
 	dout << "</BODY>\n";
 	dout << "<SCRIPT>\n";
 	dout << "function sortTable(n)\n";
@@ -592,11 +603,11 @@ void output()
 	dout << "\t\t\t\tfor(i = 1; i <(rows.length - 1); i++)\n";
 	dout << "\t\t\t\t\t{\n";
 	dout << "\t\t\t\t\t\tshouldSwitch = false;\n";
-	dout << "\t\t\t\t\t\tx = rows[i].getElementsByTagName(\"TD\")[n];\n";
-	dout << "\t\t\t\t\t\ty = rows[i + 1].getElementsByTagName(\"TD\")[n];\n";
+	dout << "\t\t\t\t\t\t\t\tx = rows[i].getElementsByTagName(\"TD\")[n];\n";
+	dout << "\t\t\t\t\t\t\t\ty = rows[i + 1].getElementsByTagName(\"TD\")[n];\n";
 	dout << "\t\t\t\t\t\tif(dir == \"asc\")\n";
 	dout << "\t\t\t\t\t\t\t{\n";
-	dout << "\t\t\t\t\t\t\t\tif ((n == 0 && x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) || (n >= 1 && Number(convertDate(x.innerHTML)) > Number(convertDate(y.innerHTML))))\n";
+	dout << "\t\t\t\t\t\t\t\tif ((n == 0 && x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) || (n != 0 && Number(convertDate(x.innerHTML)) > Number(convertDate(y.innerHTML))))\n";
 	dout << "\t\t\t\t\t\t\t\t\t{\n";
 	dout << "\t\t\t\t\t\t\t\t\t\tshouldSwitch = true;\n";
 	dout << "\t\t\t\t\t\t\t\t\t\tbreak;\n";
@@ -604,7 +615,7 @@ void output()
 	dout << "\t\t\t\t\t\t\t}\n";
 	dout << "\t\t\t\t\t\telse if(dir == \"desc\")\n";
 	dout << "\t\t\t\t\t\t\t{\n";
-	dout << "\t\t\t\t\t\t\t\tif ((n == 0 && x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) || (n >= 1 && Number(convertDate(x.innerHTML)) < Number(convertDate(y.innerHTML))))\n";
+	dout << "\t\t\t\t\t\t\t\tif ((n == 0 && x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) || (n != 0 && Number(convertDate(x.innerHTML)) < Number(convertDate(y.innerHTML))))\n";
 	dout << "\t\t\t\t\t\t\t\t\t{\n";
 	dout << "\t\t\t\t\t\t\t\t\t\tshouldSwitch = true;\n";
 	dout << "\t\t\t\t\t\t\t\t\t\tbreak;\n";
@@ -631,12 +642,12 @@ void output()
 	dout << "\t{\n";
 	dout << "\t\tif (inDate == \"\")\n";
 	dout << "\t\t\t{\n";
-	dout << "\t\t\t\treturn 245959;\n";
+	dout << "\t\t\t\treturn (250000);\n";
 	dout << "\t\t\t}\n";
 	dout << "\t\telse\n";
 	dout << "\t\t\t{\n";
 	dout << "\t\t\t\tvar part = inDate.split(\":\");\n";
-	dout << "\t\t\t\treturn +(part[0]+part[1]+part[2].substr(0, 2));\n";
+	dout << "\t\t\t\treturn (part[0]+part[1]+part[2].substr(0, 2));\n";
 	dout << "\t\t\t}\n";
 	dout << "\t}\n";
 	dout << "</SCRIPT>\n";
