@@ -586,8 +586,9 @@ void output()
 	dout << "</TABLE>\n";
 	dout << "\n<BR>\n<BR>\n";
 	dout << "<SPAN class = \"note\">Click on any header to sort the table by that column.</SPAN>\n<BR>\n";
+	dout << "<SPAN class = \"note\">\t- This page will load with the last column sorted (ascending).</SPAN>\n<BR>\n";
 	dout << "<SPAN class=\"note\">Any cell that contains multiple times will be sorted only by its first entry.</SPAN>\n<BR>\n";
-	dout << "<SPAN class=\"note\">A black cell is considered to have a time of 25:00:00.</SPAN>\n<BR>\n";
+	dout << "<SPAN class=\"note\">A blank cell is considered to have a time of 25:00:00.</SPAN>\n<BR>\n";
 	dout << "</BODY>\n";
 	dout << "<SCRIPT>\n";
 	dout << "function sortTable(n)\n";
@@ -650,6 +651,7 @@ void output()
 	dout << "\t\t\t\treturn (part[0]+part[1]+part[2].substr(0, 2));\n";
 	dout << "\t\t\t}\n";
 	dout << "\t}\n";
+	dout << "sortTable(" << dateHeaders.rear + 1 << ")";
 	dout << "</SCRIPT>\n";
 	dout << "</HTML>";
 	dout.close();
