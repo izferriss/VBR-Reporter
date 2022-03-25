@@ -42,8 +42,12 @@ void DateQueue::enqueue(Date &data)
 		rear++;
 
 		arr[rear].mDate = data.mDate;
-		arr[rear].timeArr.enqueue(data.timeArr.arr[data.timeCount - 1]);
-		arr[rear].timeCount++;
+		for (int i = 0; i < data.timeCount; i++)
+		{
+			arr[rear].timeArr.enqueue(data.timeArr.arr[i]);
+			arr[rear].timeCount = i + 1;
+		}
+		
 
 	}
 }
@@ -69,7 +73,10 @@ void DateQueue::dequeue()
 			arr[i].timeCount = arr[i + 1].timeCount;
 		}
 		arr[rear].mDate = "";
-		arr[rear].timeArr.dequeue();
+		for (int i = 0; i < arr[rear].timeCount; i++)
+		{
+			arr[rear].timeArr.dequeue();
+		}
 		arr[rear].timeCount = 0;
 		rear--;
 	}

@@ -508,11 +508,12 @@ void data2html()
 	dout << "\ttr:last-of-type td:first-of-type\n\t{\n\t\tborder-bottom-left-radius: 10px;\n\t}\n";
 	dout << "\ttr:last-of-type td:last-of-type\n\t{\n\t\tborder-bottom-right-radius: 10px;\n\t}\n";
 	dout << "\n\t/* Table */\n";						//HTML COMMENT
-	dout << "\t#report\n\t{\n\t\tbackground-clip: content-box;\\t\tborder-collapse: separate;\n\t\tborder-spacing: 0pt;\n\t\tmargin-bottom: 80px;\n\t\tmargin-right: 80px;\n\t\toverflow: hidden;\n\t\tdisplay: inline-block;\n\t}\n";
+	dout << "\t#report\n\t{\n\t\tbackground-clip: content-box;\\t\tborder-collapse: separate;\n\t\tborder-spacing: 0pt;\n\t\tmargin-right: 80px;\n\t\toverflow: hidden;\n\t\tdisplay: inline-block;\n\t}\n";
 	dout << "\n\t/* Bottom Text */\n";					//HTML COMMENT
 	dout << "\tspan.note\n\t{\n\t\tfont-size: 75%;\n\t}\n";
 	dout << "\t</STYLE>\n";
 	dout << "\t<TITLE>VBR Reporting</TITLE>\n";
+	dout << "\t<meta http-equiv=\"refresh\" content=\"" << HTML_REFRESH_RATE_SEC << "\">\n";
 	dout << "</HEAD>\n";
 	dout << "<BODY>\n";
 	dout << "<TABLE id = \"report\">\n";
