@@ -61,6 +61,10 @@ void TimeQueue::dequeue()
 				arr[i].mTime = arr[i + 1].mTime;
 			}
 		rear--;
+		if (rear == -1)
+		{
+			front - 1;
+		}
 	}
 }
 

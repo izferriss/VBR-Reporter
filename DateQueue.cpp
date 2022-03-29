@@ -79,6 +79,10 @@ void DateQueue::dequeue()
 		}
 		arr[rear].timeCount = 0;
 		rear--;
+		if (rear == -1)
+		{
+			front = -1;
+		}
 	}
 }
 

@@ -18,7 +18,7 @@
 
 						#imports file that was created above and filters on LastPointCreationTime to only return unique entries within the last 14 days.
 						$inputCSV = Import-Csv $fileio
-						$inputCSV | Where-Object {$_.LastPointCreationTime -as [datetime] -ge (get-date).AddDays(-14)} | Sort LastPointCreationTime -Unique
+						$inputCSV = $inputCSV | Where-Object {$_.LastPointCreationTime -as [datetime] -ge (get-date).AddDays(-14)} | Sort LastPointCreationTime -Unique
 
 						#outputs data back to main_output.csv
 						$inputCSV | Select JobName, LastPointCreationTime | Export-Csv $fileio -Force -NoTypeInformation
@@ -495,20 +495,22 @@ void data2html()
 	dout << "\n\t/* Body and Fonts */\n";				//HTML COMMENT
 	dout << "\t*\n\t{\n\t\tfont-family: \"Lucida Console\", \"Courier New\", monospace;\n\t}\n";
 	dout << "\n\t/* Center Alignment */\n";				//HTML COMMENT
-	dout << "\t#report th, td\n\t{\n\t\tborder: 1px solid #cebdcd;\n\t\tposition: relative;\n\t\tempty-cells: show;\n\t\ttext-align: center;\n\t}\n";
+	dout << "\t#report th, td\n\t{\n\t\tborder: 1px solid #888888;\n\t\tposition: relative;\n\t\tempty-cells: show;\n\t\ttext-align: center;\n\t}\n";
+	dout << "\ttr.tablerows:nth-child(even)\n\t{\n\t\tbackground-color: #DCDCDC;\n\t}\n";
 	dout << "\n\t/* Job Name \"Headers\" */\n";			//HTML COMMENT
-	dout << "\ttd.fauxheader\n\t{\n\t\tfont-weight: bold;\n\t}\n";
+	dout << "\ttd.indvjobnames\n\t{\n\t\ttext-align: right;\n\t\tfont-weight: bold;\n\t}\n";
 	dout << "\n\t/* Hover Effects */\n";				//HTML COMMENT
-	dout << "\tth.rowheaders:hover\n\t{\n\t\tbackground-color: #bdcebe;\n\t\ttransition: 0.75s;\n\t\tcursor: pointer;\n\t\ttext-decoration: underline;\n\t}\n";
-	dout << "\t#report td:hover::before\n\t{\n\t\tbackground-color: #e9efe9;\n\t\tcontent: '';\n\t\theight: 100%;\n\t\tleft: -5000px;\n\t\tposition: absolute;\n\t\ttop: 0;\n\t\twidth: 10000px;\n\t\tz-index: -2;\n\t}\n";
-	dout << "\t#report td:hover::after\n\t{\n\t\tbackground-color: #e9efe9;\n\t\tcontent: '';\n\t\theight: 10000px;\n\t\tleft: 0;\n\t\tposition: absolute;\n\t\ttop: -5000px;\n\t\twidth: 100%;\n\t\tz-index: -1;\n\t}\n";
+	dout << "\t.highlight\n\t{\n\t\tbackground: #000000;\n\t\tcolor: #FFFFFF;\n\t\toutline:none;\n\t\tborder-color:#ffffff;\n\t\ttransition: 0.25s;\n\t\ttransition-timing-function: ease;\n\t\tbox-shadow:0 0 10px #000000;\n\t}\n";
+	dout << "\tth.tableheaders:hover\n\t{\n\t\tcolor: #FFFFFF;\n\t\tbackground-color: #000000;\n\t\ttransition: 0.75s;\n\t\ttransition-timing-function: ease-out;\n\t\tcursor: pointer;\n\t\ttext-decoration: underline;\n\t}\n";
+//	dout << "\ttd:hover::before\n\t{\n\t\tbackground-color: rgba(0,0,0,.25);\n\t\tcontent: '';\n\t\theight: 100%;\n\t\tleft: -5000px;\n\t\tposition: absolute;\n\t\ttop: 0;\n\t\twidth: 10000px;\n\t\tz-index: -1;\n\t}\n";
+//	dout << "\ttd:hover::after\n\t{\n\t\tbackground-color: rgba(0,0,0,.25);\n\t\tcontent: '';\n\t\theight: 10000px;\n\t\tleft: 0;\n\t\tposition: absolute;\n\t\ttop: -5000px;\n\t\twidth: 100%;\n\t\tz-index: -1;\n\t}\n";
 	dout << "\n\t/* Rounded Corners */\n";				//HTML COMMENT
 	dout << "\tth:first-of-type\n\t{\n\t\tborder-top-left-radius: 10px;\n\t}\n";
 	dout << "\tth:last-of-type\n\t{\n\t\tborder-top-right-radius: 10px;\n\t}\n";
 	dout << "\ttr:last-of-type td:first-of-type\n\t{\n\t\tborder-bottom-left-radius: 10px;\n\t}\n";
 	dout << "\ttr:last-of-type td:last-of-type\n\t{\n\t\tborder-bottom-right-radius: 10px;\n\t}\n";
 	dout << "\n\t/* Table */\n";						//HTML COMMENT
-	dout << "\t#report\n\t{\n\t\tbackground-clip: content-box;\\t\tborder-collapse: separate;\n\t\tborder-spacing: 0pt;\n\t\tmargin-right: 80px;\n\t\toverflow: hidden;\n\t\tdisplay: inline-block;\n\t}\n";
+	dout << "\t#report\n\t{\n\t\tbackground-clip: content-box;\n\t\tborder-collapse: separate;\n\t\tborder-spacing: 0pt;\n\t\tmargin-right: 80px;\n\t\toverflow: hidden;\n\t\tdisplay: inline-block;\n\t}\n";
 	dout << "\n\t/* Bottom Text */\n";					//HTML COMMENT
 	dout << "\tspan.note\n\t{\n\t\tfont-size: 75%;\n\t}\n";
 	dout << "\t</STYLE>\n";
@@ -519,7 +521,7 @@ void data2html()
 	dout << "<TABLE id = \"report\">\n";
 	dout << "<THEAD>\n";
 	dout << "\t<TR>\n";
-	dout << "\t\t<TH class =\"rowheaders\" onclick=\"sortTable(0)\">Job Name</TH>\n";
+	dout << "\t\t<TH class =\"tableheaders\" onclick=\"sortTable(0)\">Job Name</TH>\n";
 	for (int i = 0; i < dateHeaders.rear + 1; i++)
 	{
 		if (dateHeaders.arr[i] == "")
@@ -530,7 +532,7 @@ void data2html()
 		else
 		{
 			int j = i + 1;
-			dout << "\t\t<TH class =\"rowheaders\" onclick=\"sortTable(" << j << ")\">" << dateHeaders.arr[i] << "</TH>\n";
+			dout << "\t\t<TH class =\"tableheaders\" onclick=\"sortTable(" << j << ")\">" << dateHeaders.arr[i] << "</TH>\n";
 		}
 	}
 	dout << "\t</TR>\n";
@@ -541,9 +543,9 @@ void data2html()
 	for (int i = 0; i < numUniqueJobs; i++)
 	{
 		//Make a new row
-		dout << "\t<TR>\n";
+		dout << "\t<TR class =\"tablerows\">\n";
 		//The first cell is the job name
-		dout << "\t\t<TD class =\"fauxheader\">" << jobArr[i].name << "</TD>\n";
+		dout << "\t\t<TD class =\"indvjobnames\">" << jobArr[i].name << "</TD>\n";
 		//for each date in this job
 		for (int j = 0; j < jobArr[i].dateArr.rear + 1; j++)
 		{
@@ -701,7 +703,24 @@ void data2html()
 	dout << "\t\t\t}\n";
 	dout << "\t}\n";
 	dout << "\n\n\t/* sorts on load */\n";
-	dout << "sortTable(" << dateHeaders.rear + 1 << ")";
+	dout << "sortTable(" << dateHeaders.rear + 1 << ")\n\n";
+	dout << "var tbl = document.getElementById('report');\n";
+	dout << "var cells = tbl.getElementsByTagName('td');\n";
+	dout << "var tempClass;\n";
+	dout << "for (var i = 0, j = cells.length; i < j; i++)\n";
+	dout << "\t{\n";
+	dout << "\t\tif(cells[i].className != 'indvjobnames')\n";
+	dout << "\t\t\t{\n";
+	dout << "\t\t\t\tcells[i].onmouseover = function()\n";
+	dout << "\t\t\t\t\t{\n";
+	dout << "\t\t\t\t\t\tthis.className = 'highlight';\n";
+	dout << "\t\t\t\t\t}\n";
+	dout << "\t\t\t\tcells[i].onmouseout = function()\n";
+	dout << "\t\t\t\t\t{\n";
+	dout << "\t\t\t\t\t\tthis.className = '';\n";
+	dout << "\t\t\t\t\t}\n";
+	dout << "\t\t\t}\n";
+	dout << "\t}\n";
 	dout << "</SCRIPT>\n";
 	dout << "</HTML>";
 	dout.close();
