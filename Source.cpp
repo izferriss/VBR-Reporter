@@ -5,23 +5,51 @@
 	Created by:		Ivan Ferriss
 	Published:		3/13/2022
 
-	Last Updated:	3/24/2022
+	Last Updated:	4/29/2022
 */
 /*
 	Veeam Script:
 
-						#filename
-	   replace path --> $fileio = '\\255.255.255.255\IT_Dept\VBRMainRecord.csv'
+				#filename
+	replace	-->	$fileio = 'PATH'
 
-						#gets last-ran VBR jobs that have ran at least once in the last two weeks then exports and appends them to $fileio
-						Get-VBRBackup | Where-Object{(get-date $_.LastPointCreationTime) -ge (get-date).AddDays(-14)} | Select JobName, LastPointCreationTime | Export-Csv $fileio -NoTypeInformation -Append -Force
+				#gets NON-AGENT VBR jobs and appends them to an exported CSV
+				Get-VBRBackupSession | Where-Object{(get-date $_.EndTime) -ge (get-date).AddDays(-14)} | Select JobName, EndTime | Export-Csv $fileio -NoTypeInformation -Append -Force
 
-						#imports file that was created above and filters on LastPointCreationTime to only return unique entries within the last 14 days.
-						$inputCSV = Import-Csv $fileio
-						$inputCSV = $inputCSV | Where-Object {$_.LastPointCreationTime -as [datetime] -ge (get-date).AddDays(-14)} | Sort LastPointCreationTime -Unique
+				#imports CSV that was created above and filters on EndTime to only return unique entries within the last 14 days.
+				$inputCSV = Import-Csv $fileio
+				$inputCSV = $inputCSV | Where-Object {$_.EndTime -as [datetime] -ge (get-date).AddDays(-14)} | Sort EndTime -Unique
 
-						#outputs data back to main_output.csv
-						$inputCSV | Select JobName, LastPointCreationTime | Export-Csv $fileio -Force -NoTypeInformation
+				#exports CSV
+				$inputCSV | Select JobName, EndTime | Export-Csv $fileio -Force -NoTypeInformation
+
+				#gets the names of all AGENT VBR jobs
+				$jobnames = Get-VBREPJob | Where-Object{$_.NextRun -as [datetime] -ge (get-date).AddDays(-14)} | Select Name
+
+				#gets the EndTime for each AGENT VBR job and assigns them to a variable
+				$agents = foreach($name in $jobnames)
+					{
+						$endtimes = Get-VBREPSession -Name $name.Name | Where-Object{$_.EndTime -as [datetime] -ge (get-date).AddDays(-14)}
+	
+						foreach($time in $endtimes)
+							{
+								New-Object -TypeName PSObject -Property @{
+								JobName = $name.Name
+								EndTime = $time.EndTime }
+							}
+					}
+
+				#exports CSV
+				$agents | Export-Csv $fileio -NoTypeInformation -Append -Force
+
+				#imports CSV that was created above and filters on EndTime to only return unique entries within the last 14 days.
+				$inputCSV = Import-Csv $fileio
+				$inputCSV = $inputCSV | Where-Object {$_.EndTime -as [datetime] -ge (get-date).AddDays(-14)} | Sort-Object {$_.EndTime -as [datetime]} -Unique
+
+				#exports CSV
+				$inputCSV | Select JobName, EndTime | Export-Csv $fileio -Force -NoTypeInformation
+
+
 						
 	CSV prerequisite:	
 						The file must contain two columns that are comma-delimited.
@@ -101,8 +129,6 @@ int main()
 	if (din.is_open())
 	{
 		getline(din, sLine);	//necessary action, but ignorable data; reads in headers
-		lineCount++;
-		getline(din, sLine);	//necessary action, but ignorable data; reads in blank line
 		lineCount++;
 
 		//Read in the rest of the file one line at a time until the end of the file
